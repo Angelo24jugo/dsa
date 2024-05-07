@@ -1,0 +1,179 @@
+#include <iostream>
+#include <string>
+#include <queue>
+
+using namespace std;
+
+struct User {
+    string username;
+    int userID;
+
+    User() {}
+    User(const string& name, int id) : username(name), userID(id) {}
+};
+
+struct Node {
+    User data;
+    Node* next;
+
+    Node(const User& userData) : data(userData), next(nullptr) {}
+};
+
+class UserDatabase {
+private:
+    Node* head; 
+    queue<User> userQueue;
+    User users[100]; 
+    int userCount;
+
+public:
+    UserDatabase() : head(nullptr), userCount(0) {}
+
+    void createUser(const string& name) {
+        User newUser(name, userCount + 1);
+        users[userCount] = newUser;
+        userCount++;
+
+        Node* newNode = new Node(newUser);
+        if (!head) {
+            head = newNode;
+        } else {
+            Node* temp = head;
+            while (temp->next) {
+                temp = temp->next;
+            }
+            temp->next = newNode;
+        }
+        userQueue.push(newUser);
+
+        cout << "User " << newUser.username << " created successfully!" << endl;
+    }
+
+    void readUser(int userID) {
+        if (userID >= 1 && userID <= userCount) {
+            User user = users[userID - 1];
+            cout << "User ID: " << user.userID << endl;
+            cout << "Username: " << user.username << endl;
+        } else {
+            cout << "User ID not found!" << endl;
+        }
+    }
+
+    void updateUser(int userID, const string& newName) {
+        if (userID >= 1 && userID <= userCount) {
+            users[userID - 1].username = newName;
+
+            Node* temp = head;
+            while (temp) {
+                if (temp->data.userID == userID) {
+                    temp->data.username = newName;
+                    break;
+                }
+                temp = temp->next;
+            }
+
+            cout << "User information updated successfully!" << endl;
+        } else {
+            cout << "User ID not found!" << endl;
+        }
+    }
+
+    void deleteUser(int userID) {
+        if (userID >= 1 && userID <= userCount) {
+            for (int i = userID - 1; i < userCount - 1; ++i) {
+                users[i] = users[i + 1];
+            }
+            userCount--;
+
+            Node* temp = head;
+            Node* prev = nullptr;
+            while (temp) {
+                if (temp->data.userID == userID) {
+                    if (!prev) {
+                        head = temp->next;
+                    } else {
+                        prev->next = temp->next;
+                    }
+                    delete temp;
+                    cout << "User deleted successfully!" << endl;
+                    return;
+                }
+                prev = temp;
+                temp = temp->next;
+            }
+
+            cout << "User ID not found!" << endl;
+        } else {
+            cout << "User ID not found!" << endl;
+        }
+    }
+
+    void displayUsers() {
+        cout << "User:" << endl;
+        for (int i = 0; i < userCount; ++i) {
+            cout << "User ID: " << users[i].userID << ", Username: " << users[i].username << endl;
+        }
+
+    }
+};
+
+int main() {
+    UserDatabase database;
+
+    int choice;
+    do {
+        cout <<"  ============================================================================"<<endl;
+        cout <<"                            Organizational Structure"                          <<endl;
+        cout <<"  ============================================================================"<<endl;
+        cout << "\n    1. Create User                                      4. Delete User      ";
+        cout << "\n    2. Read User                                        5. Display User     ";
+        cout << "\n    3. Update User                                      6. Exit             "<<endl;
+        cout <<"  ============================================================================"<<endl;
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1: {
+                string name;
+                cout << "Enter username: ";
+                cin >> name;
+                database.createUser(name);
+                break;
+            }
+            case 2: {
+                int userID;
+                cout << "Enter user ID: ";
+                cin >> userID;
+                database.readUser(userID);
+                break;
+            }
+            case 3: {
+                int userID;
+                string newName;
+                cout << "Enter user ID: ";
+                cin >> userID;
+                cout << "Enter new username: ";
+                cin >> newName;
+                database.updateUser(userID, newName);
+                break;
+            }
+            case 4: {
+                int userID;
+                cout << "Enter user ID to delete: ";
+                cin >> userID;
+                database.deleteUser(userID);
+                break;
+            }
+            case 5:
+                database.displayUsers();
+                break;
+            case 6:
+                cout << "Exiting program..." << endl;
+                break;
+            default:
+                cout << "Invalid choice! Please try again." << endl;
+        }
+    } while (choice != 6);
+
+    return 0;
+}
